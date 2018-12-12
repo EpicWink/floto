@@ -18,7 +18,7 @@ class ActivityWorker:
     def activity1(context):
         # Do work
         return {'my':'result'}
-    
+
     my_activity_worker = ActivityWorker(task_list='my_tl', domain='my_domain')
     my_activity_worker.run()
     """
@@ -70,6 +70,15 @@ class ActivityWorker:
         else:
             self.task_token = None
 
+    def call(self, function_id, context):
+        activity_function = floto.ACTIVITY_FUNCTIONS[function_id]
+        kwargs = {}
+        if 'context' in signature(activity_function).parameters:
+            kwargs['context'] = context
+        if 'cancel' in signature(activity_function).parameters:
+            kwargs['cancel'] = self.heartbeat_sender.cancel_requested
+        self.result = activity_function()
+
     def run(self):
         logger.debug('ACTIVITY_FUNCS: {}'.format(floto.ACTIVITY_FUNCTIONS))
         number_polls = 0
@@ -84,11 +93,7 @@ class ActivityWorker:
                 try:
                     if function_id in floto.ACTIVITY_FUNCTIONS:
                         self.start_heartbeat()
-                        activity_function = floto.ACTIVITY_FUNCTIONS[function_id]
-                        if 'context' in signature(activity_function).parameters:
-                            self.result = activity_function(context=context)
-                        else:
-                            self.result = activity_function()
+                        self.call(function_id, context)
                         self.stop_heartbeat()
                         try:
                             self.complete()

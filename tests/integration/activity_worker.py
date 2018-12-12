@@ -32,6 +32,18 @@ def activity3(context):
     return result
 
 
+@floto.activity(domain='floto_test', name='activity7', version='v2')
+def activity7(context, cancel=None):
+    print('activity7 started' + 20 * '.')
+    activity1_result = [v for k, v in context.items() if 'activity1' in k][0]
+    if cancel and cancel():
+        return {}
+    result = {'status': 'finished',
+              'activity1': activity1_result}
+    print('activity7 finished' + 20 * '.')
+    return result
+
+
 FAILURE_COUNT_1 = 0
 
 
@@ -84,9 +96,9 @@ def generator1():
     print('generator_1 started' + 20 * '.')
     rs = floto.specs.retry_strategy.InstantRetry(retries=2)
     domain = 'floto_test'
-    task_1 = floto.specs.task.ActivityTask(domain=domain, name='activity4', version='v2', 
+    task_1 = floto.specs.task.ActivityTask(domain=domain, name='activity4', version='v2',
             retry_strategy=rs, input={'file':'a.in'})
-    task_2 = floto.specs.task.ActivityTask(domain=domain, name='activity4', version='v2', 
+    task_2 = floto.specs.task.ActivityTask(domain=domain, name='activity4', version='v2',
             retry_strategy=rs, input={'file':'b.in'})
     print('generator_1 finished' + 20 * '.')
     return [task_1, task_2]
@@ -104,7 +116,7 @@ def activity_6(context):
 class ActivityWorkerProcess(object):
     def __init__(self, domain, task_list):
         self._process = None
-        self.worker = floto.ActivityWorker(domain=domain, task_list=task_list, 
+        self.worker = floto.ActivityWorker(domain=domain, task_list=task_list,
             task_heartbeat_in_seconds=5)
 
     def start(self):

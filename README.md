@@ -236,10 +236,12 @@ The following code example show the definition of two activity functions:
 import floto
 
 @floto.activity(name='ActivityA', version='v1')
-def activity_a(context):
+def activity_a(context, cancel=None):
     print('Running ActivityA')
     print(context)
-    return {'your':'result_activity_a'}
+    if cancel and cancel():
+        return {"cancelled": True}
+    return {'your':'result_activity_a', "cancelled": False}
 
 @floto.activity(name='ActivityB', version='v1')
 def activity_b():
@@ -247,7 +249,7 @@ def activity_b():
     return {'your':'result_activity_b'}
 ```
 
-``name`` and ``version`` are handed over to the decorator and must correspond to ``name`` and ``version`` of the  ``ActivityTask`` defined in the Decider logic in order to get executed. The activity itself can have a ``context`` parameter which provides input to the function (See [Activity Context](#activity-context)). 
+``name`` and ``version`` are handed over to the decorator and must correspond to ``name`` and ``version`` of the  ``ActivityTask`` defined in the Decider logic in order to get executed. The activity itself can have a ``context`` parameter which provides input to the function (See [Activity Context](#activity-context)). The activity can also have a ``cancel`` parameter which can be called to see if activity should cancel (as requested by SWF).
 ### Generator
 Generators are special kinds of activities which must return a list of activity tasks. These activity tasks are subsequently included in the execution logic, i.e. a generator is able to spawn tasks which e.g. depend on the input of the activity function.
 
