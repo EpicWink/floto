@@ -18,7 +18,7 @@ class ActivityWorker:
     def activity1(context):
         # Do work
         return {'my':'result'}
-    
+
     my_activity_worker = ActivityWorker(task_list='my_tl', domain='my_domain')
     my_activity_worker.run()
     """
@@ -71,6 +71,9 @@ class ActivityWorker:
             self.task_token = None
 
     def run(self):
+        _s = 'Starting worker \'{}\' on task-list \'{}\' in domain \'{}\' with heartbeat {}'
+        _m = _s.format(self.identity, self.task_list, self.domain, self.task_heartbeat_in_seconds)
+        logger.info(_m)
         logger.debug('ACTIVITY_FUNCS: {}'.format(floto.ACTIVITY_FUNCTIONS))
         number_polls = 0
         while (not self.get_terminate_activity_worker()) and (number_polls < self.max_polls):
@@ -114,6 +117,7 @@ class ActivityWorker:
 
     def task_failed(self, error):
         logger.debug('ActivityWorker.task_failed...')
+        logger.debug('Error: {}'.format(error))
         self.swf.client.respond_activity_task_failed(taskToken=self.task_token, details=str(error))
 
     def terminate_worker(self):

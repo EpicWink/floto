@@ -9,7 +9,7 @@ from floto.decider import Base
 logger = logging.getLogger(__name__)
 
 class Decider(Base):
-    """Decider which is defined by a DeciderSpec object 
+    """Decider which is defined by a DeciderSpec object
 
     Parameters
     ----------
@@ -24,7 +24,7 @@ class Decider(Base):
             self.decider_spec = floto.specs.DeciderSpec.from_json(decider_spec)
         else:
             self.decider_spec = decider_spec
-        
+
         self.task_list = self.decider_spec.task_list
         self.domain = self.decider_spec.domain
 
@@ -41,7 +41,7 @@ class Decider(Base):
         """Heart of the decider logic. Called by floto.decider.Base in each
         'poll_for_decision_task loop'. Fills self.decisions, which are returned to SWF.
         """
-        logger.debug('Decider.get_decisions...')
+        logger.debug('Task {}: Decider.get_decisions...'.format(self.task_token))
         self.decisions = self.decision_builder.get_decisions(self.history)
         self.terminate_workflow = self.decision_builder.is_terminate_workflow()
 
